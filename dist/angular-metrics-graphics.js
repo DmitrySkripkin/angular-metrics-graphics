@@ -10,7 +10,7 @@
  * @param {Array} data Chart data
  * @param {Object} options Chart configuration
  */
-angular.module('metricsgraphics', []).directive('chart', function() {
+angular.module('metricsgraphics', []).directive('chart', function($timeout, $rootScope) {
   return {
     link: function(scope, element) {
       // default options
@@ -63,12 +63,20 @@ angular.module('metricsgraphics', []).directive('chart', function() {
         // build chart
         MG.data_graphic(options);
       },true);
+      $timeout(function () {
+        element.on('click', function(event){
+          $rootScope.$broadcast('mg_click', {name: scope.chart, event: event.target.__data__});
+        });
+      });
+
+
     },
     restrict: 'E',
     scope: {
       convertDateField: '@',
       data: '=',
-      options: '='
+      options: '=',
+      chart: '='
     }
   };
 });
