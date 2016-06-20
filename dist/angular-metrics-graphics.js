@@ -10,7 +10,7 @@
  * @param {Array} data Chart data
  * @param {Object} options Chart configuration
  */
-angular.module('metricsgraphics', []).directive('chart', function($timeout, $rootScope) {
+angular.module('metricsgraphics', []).directive('chart', function($timeout, $rootScope, $window) {
   return {
     link: function(scope, element) {
       // default options
@@ -20,7 +20,8 @@ angular.module('metricsgraphics', []).directive('chart', function($timeout, $roo
         height: 200,
         right: 0,
         title: null,
-        width: element[0].parentElement.clientWidth || 300,
+        //width: element[0].parentElement.parentElement.clientWidth || 300,
+        full_width: true,
         x_accessor: null,
         y_accessor: null
       };
@@ -63,10 +64,30 @@ angular.module('metricsgraphics', []).directive('chart', function($timeout, $roo
         // build chart
         MG.data_graphic(options);
       },true);
+
+      scope.$watch('options', function() {
+        Object.keys(scope.options).forEach(function(key) {
+          options[key] = scope.options[key];
+        });
+        MG.data_graphic(options);
+      });
       $timeout(function () {
         element.on('click', function(event){
           $rootScope.$broadcast('mg_click', {name: scope.chart, event: event.target.__data__});
         });
+
+        var w = angular.element($window);
+          scope.getWindowDimensions = function () {
+            return {
+              'h': w.height(),
+              'w': w.width()
+            };
+          };
+          scope.$watch(scope.getWindowDimensions, function () {
+            $timeout(function () {
+              MG.data_graphic(options);
+            }, 1000);
+          }, true);
       });
 
 
